@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Free Fire Headshot Toggle</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+  <div class="bg-white p-8 rounded shadow-md text-center w-80">
+    <h1 class="text-2xl font-bold mb-6">Free Fire Headshot</h1>
+    <button id="toggleBtn" class="px-6 py-3 rounded text-white text-lg transition-colors duration-300">
+      Loading...
+    </button>
+  </div>
+
+  <script>
+    const toggleBtn = document.getElementById('toggleBtn');
+
+    async function fetchStatus() {
+      try {
+        const res = await fetch('http://localhost:3000/headshot-status');
+        const data = await res.json();
+        updateButton(data.headshot);
+      } catch (error) {
+        toggleBtn.textContent = 'Error';
+        toggleBtn.className = 'px-6 py-3 rounded bg-red-600 text-white text-lg';
+      }
+    }
+
+    function updateButton(isOn) {
+      if (isOn) {
+        toggleBtn.textContent = 'Headshot ON';
+        toggleBtn.className = 'px-6 py-3 rounded bg-green-600 hover:bg-green-700 text-white text-lg';
+      } else {
+        toggleBtn.textContent = 'Headshot OFF';
+        toggleBtn.className = 'px-6 py-3 rounded bg-gray-600 hover:bg-gray-700 text-white text-lg';
+      }
+    }
+
+    toggleBtn.addEventListener('click', async () => {
+      const currentStatus = toggleBtn.textContent.includes('ON');
+      const newStatus = !currentStatus;
+      try {
+        const res = await fetch('http://localhost:3000/headshot-status', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ headshot: newStatus }),
+        });
+        const data = await res.json();
+        if (data.success) {
+          updateButton(data.headshot);
+        } else {
+          alert('Failed to update status');
+        }
+      } catch (error) {
+        alert('Error updating status');
+      }
+    });
+
+    fetchStatus();
+  </script>
+</body>
+</html>
